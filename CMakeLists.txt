@@ -142,8 +142,16 @@ endif()
 add_custom_target(build-version
   ${PYTHON_EXECUTABLE}
   ${CMAKE_CURRENT_SOURCE_DIR}/utils/update_build_version.py
-  ${shaderc_SOURCE_DIR} ${spirv-tools_SOURCE_DIR} ${glslang_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/build-version.inc
-  COMMENT "Update build-version.inc in the Shaderc build directory (if necessary).")
+  ${shaderc_SOURCE_DIR} ${glslang_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/spirv-build-version.inc ${CMAKE_CURRENT_BINARY_DIR}/build-version.inc
+  COMMENT "Update build-version.inc in the Shaderc build directory (if necessary)."
+  DEPENDS spirv-build-version
+)
+
+add_custom_target(spirv-build-version
+  ${PYTHON_EXECUTABLE}
+  ${spirv-tools_SOURCE_DIR}/utils/update_build_version.py
+  ${spirv-tools_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR}/spirv-build-version.inc
+  COMMENT "Generate SPIRV-Tools build-version.inc")
 
 function(define_pkg_config_file NAME LIBS)
   add_custom_target(${NAME}-pkg-config ALL

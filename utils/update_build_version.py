@@ -17,7 +17,7 @@
 # Updates build-version.inc in the current directory, unless the update is
 # identical to the existing content.
 #
-# Args: <shaderc-dir> <spirv-tools-dir> <glslang-dir>
+# Args: <shaderc-dir> <glslang-dir> <spirv-tools-build-version.inc-path>
 #
 # For each directory, there will be a line in build-version.inc containing that
 # directory's "git describe" output enclosed in double quotes and appropriately
@@ -30,6 +30,7 @@ import re
 import subprocess
 import sys
 import time
+from ast import literal_eval
 
 def mkdir_p(directory):
     """Make the directory, and all its ancestors as required.  Any of the
@@ -129,15 +130,19 @@ def get_version_string(project, directory):
 
 def main():
     if len(sys.argv) != 5:
-        print(('usage: {} <shaderc-dir> <spirv-tools-dir> <glslang-dir> <output-file>'.format(
+        print(('usage: {} <shaderc-dir> <glslang-dir> <spirv-tools-build-version.inc-path> <output-file>'.format(
             sys.argv[0])))
         sys.exit(1)
 
-    projects = ['shaderc', 'spirv-tools', 'glslang']
+    projects = ['shaderc', 'glslang']
     new_content = ''.join([
         '"{}\\n"\n'.format(get_version_string(p, d))
-        for (p, d) in zip(projects, sys.argv[1:])
+        for (p, d) in zip(projects, sys.argv[1:2])
     ])
+
+    with open(sys.argv[3], "r") as spirv_version_inc:
+      version_tuple = literal_eval(spirv_version_inc.read())
+      new_content += "\"{}\\n\"\n".format(version_tuple[1])
 
     output_file = sys.argv[4]
     mkdir_p(os.path.dirname(output_file))
